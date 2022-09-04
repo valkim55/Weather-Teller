@@ -1,0 +1,16 @@
+header div {
+    background-color: var(--indigo);
+    background-image: linear-gradient(45deg, var(--indigo), var(--purple), var(--pink), var(--cyan), var(--teal));
+}
+
+.favorable {
+    background-color: sandybrown;
+}
+
+.moderate {
+    background-color: coral;
+}
+
+.severe {
+    background-color: orangered;
+}
