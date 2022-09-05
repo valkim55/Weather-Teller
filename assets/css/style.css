@@ -1,7 +1,83 @@
-header div {
-    background-color: var(--indigo);
-    background-image: linear-gradient(45deg, var(--indigo), var(--purple), var(--pink), var(--cyan), var(--teal));
+header div,
+footer {
+    background-color: #FC600A;
+    background-image: linear-gradient(45deg, #FCCB1A, #DD560D, #FC600A, #D7692D, #F3CC3F);
+    border: 3px solid #C14B0B;
 }
+
+main {
+    margin: auto;
+    width: 90%;
+}
+
+.btn {
+    text-decoration:none;
+    background-color: #DD560D;
+    color: white;
+    font-weight: bold;
+    padding: 6px 5px;
+    width: 100%;
+    display: block;
+    margin: 5px 0;
+}
+
+.card {
+    margin: 10px 0 10px 0;
+    border: 3px solid #C14B0B;
+
+}
+
+.card-header {
+    color: whitesmoke;
+    background-color: #DD560D;
+    margin: 2px;
+    padding: 2.5%;
+    border-radius: 10px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+.current-day {
+    background-color: #F6B24C;
+    border: 3px solid #C14B0B;
+    margin-top: 10px;
+    background-image: linear-gradient(60deg, #FD8C4E, #BB686D, #C85228);
+}
+
+.param-list {
+    padding: 0;
+    list-style: none;
+}
+
+.param-list-item {
+    font-size: 20px;
+    padding: 15px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.future-forecast {
+    border: 3px solid #C14B0B;
+    color: whitesmoke;
+    background-color: #DD560D;
+    padding: 10px;
+    margin-top: 15px;
+}
+
+.card-content {
+    border: 3px solid #C14B0B;
+    background-image: linear-gradient(20deg, #FD8C4E, #BB686D, #C85228);
+    color: #EDD1B0;
+    margin: 2px;
+    font-size: 16px;
+}
+
+
+
 
 .favorable {
     background-color: sandybrown;
