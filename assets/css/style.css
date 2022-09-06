@@ -42,10 +42,16 @@ main {
 }
 
 .current-day {
-    background-color: #F6B24C;
     border: 3px solid #C14B0B;
     margin-top: 10px;
     background-image: linear-gradient(60deg, #FD8C4E, #BB686D, #C85228);
+}
+
+#search-term {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    font-size: 30px;
+    font-weight: bold;
 }
 
 .param-list {
@@ -57,7 +63,6 @@ main {
     font-size: 20px;
     padding: 15px;
     font-weight: bold;
-    text-decoration: none;
 }
 
 .future-forecast {
@@ -76,7 +81,17 @@ main {
     font-size: 16px;
 }
 
-
+.search-history-container {
+    width: 100%;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    background-color: #F6B24C;
+    margin: 2px;
+    padding: 2.5%;
+    border-radius: 10px;
+    border: 3px solid #C14B0B;
+}
 
 
 .favorable {

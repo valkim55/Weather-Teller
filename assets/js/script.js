@@ -9,11 +9,20 @@ var cityFormEl = document.querySelector("#city-form");
 //create a variable to store a reference to the <input> with an id cityName
 var cityInputEl = document.querySelector("#cityName");
 
-// create a variable to reference the search-term <span> to display currently viewed city name
+// create a variable to reference the search-term div to display currently viewed city name, date and weathericon
 var citySearchTerm = document.querySelector("#search-term");
 //create a variable to reference the cityInfo-container where the info about temp, wind, humidity and UV index will go
 var cityInfoContainerEl = document.querySelector("#cityInfo-container");
 
+//create a variable to reference the city search history container on the left
+var searchHistoryContainer = document.querySelector("#search-history");
+
+//create five variables to reference the containers for the next five days forecast
+var oneDayAfterContainer = document.querySelector("#day1");
+var twoDaysAfterContainer = document.querySelector("#day2");
+var threeDaysAfterContainer = document.querySelector("#day3");
+var fourDaysAfterContainer = document.querySelector("#day4");
+var fiveDaysAfterContainer = document.querySelector("#day5");
 
 
 // construct openweather query URL which will store the current weather data
@@ -24,14 +33,24 @@ var cityInfoContainerEl = document.querySelector("#cityInfo-container");
 //var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&appid=" + apiKey;
 
 var getCityName = function(cityName) {
-    var queryURL = "http://api.openweathermap.org/data/2.5/weather?q="+cityName+"&appid="+apiKey;
+    var queryURL = "http://api.openweathermap.org/data/2.5/weather?q="+cityName+"&appid="+apiKey+"&units=imperial";
     // call the fetch api to pass the query URL as a parameter
     fetch(queryURL).then(function(response) {
-        response.json().then(function(data) {
-        
-        //after displayWeather function was created we will send the response data from getCityName to displayWeather
-        displayWeather(data, cityName);
-        });
+
+        // check if the response is ok - meaning the requested city name exists
+        if (response.ok) {
+            response.json().then(function(data) {
+                //after displayWeather function was created we will send the response data from getCityName to displayWeather
+                displayWeather(data, cityName);
+            });
+        } else {
+            alert("Error: City Name Not Found");
+        }
+    })
+
+    //handle the response in case there's a network error
+    .catch(function(error) {
+        alert("Unable to connect to server");
     });
 };
 //getCityName("Seattle");
@@ -62,22 +81,44 @@ var displayWeather = function(cityInfo, searchTerm) {
     console.log(cityInfo);
     console.log(searchTerm);
 
-    // before any input make sure to clear out old content before displaying new input content
+    // make sure to clear out old content before displaying new input content
     cityInfoContainerEl.textContent = "";
-    citySearchTerm.textContent = searchTerm;
+    citySearchTerm.textContent = "";
+    oneDayAfterContainer.textContent = "";
+    twoDaysAfterContainer.textContent = "";
+    threeDaysAfterContainer.textContent = "";
+    fourDaysAfterContainer.textContent = "";
+    fiveDaysAfterContainer.textContent = "";
 
-    //loop through the info of the cities
-    //format the data for the temperature
-    var temp = "Temp: " + cityInfo.main.temp;
-    console.log(temp);
-    //format the data for the wind
-    var wind = "Wind: " + cityInfo.wind.speed;
-    console.log(wind);
-    //format the data for humidity
+   
+    // dynamically create a span element to hold a currently viewed city name and append to search-term div
+    var currentCity = document.createElement("span");
+    currentCity.classList = "text-uppercase";
+    currentCity.textContent = searchTerm;
+    citySearchTerm.appendChild(currentCity);
+
+    //dynamically create a span element to hold the current date info for the selected city
+    var currentDate = moment().format("L");
+    var currentDateEl = document.createElement("span");
+    currentDateEl.textContent = " ("+currentDate+") ";
+    citySearchTerm.appendChild(currentDateEl);
+
+
+    //dynamically create buttons/holders to store the city name in the search history container
+    var cityHistoryList = document.createElement("button");
+    cityHistoryList.classList = "search-history-container text-uppercase";
+    var cityHistoryEl = document.createElement("span");
+    cityHistoryEl.textContent = searchTerm;
+    cityHistoryList.appendChild(cityHistoryEl);
+    searchHistoryContainer.appendChild(cityHistoryList);
+
+
+    // go throught the data for selected city and format the data for temperature, wind, humidity and UV
+    var temp = "Temp: " + cityInfo.main.temp + "°F";
+    var wind = "Wind: " + cityInfo.wind.speed + " MPH";
     var humidity = "Humidity: " + cityInfo.main.humidity + "%";
-    console.log(humidity);
-    //create a container and span for each data
-    // append span to container, and then append that container to cityInfo-container div
+    
+    //create a container and span for each data. append span to container, and then append that container to cityInfo-container div
     var tempEl = document.createElement("div");
     tempEl.classList = "param-list-item flex-row justify-space-between align-center";
     var tempTitleEl = document.createElement("span");
@@ -98,8 +139,53 @@ var displayWeather = function(cityInfo, searchTerm) {
     humidTitleEl.textContent = humidity;
     humidEl.appendChild(humidTitleEl);
     cityInfoContainerEl.appendChild(humidEl);
+
+    // call the function for the next five days to display after submitting city name
+    nextFiveDates();
+    
 };
+
+
+// create function to generate the dates for the next five days from current view date
+var nextFiveDates = function() {
+    // get the dates for the next 5 days cards
+    var dayOneAfter = moment().add(1, 'd').format("L");
+    var oneDayAfterEl = document.createElement("h4");
+    oneDayAfterEl.textContent = dayOneAfter;
+    oneDayAfterEl.classList = "card-header";
+    oneDayAfterContainer.appendChild(oneDayAfterEl);
+
+    var twoDaysAfter = moment().add(2, 'd').format("L");
+    var twoDaysAfterEl = document.createElement("h4");
+    twoDaysAfterEl.textContent = twoDaysAfter;
+    twoDaysAfterEl.classList = "card-header";
+    twoDaysAfterContainer.appendChild(twoDaysAfterEl);
+
+    var threeDaysAfter = moment().add(3, 'd').format("L");
+    var threeDaysAfterEl = document.createElement("h4");
+    threeDaysAfterEl.textContent = threeDaysAfter;
+    threeDaysAfterEl.classList = "card-header";
+    threeDaysAfterContainer.appendChild(threeDaysAfterEl);
+
+    var fourDaysAfter = moment().add(4, 'd').format("L");
+    var fourDaysAfterEl = document.createElement("h4");
+    fourDaysAfterEl.textContent = fourDaysAfter;
+    fourDaysAfterEl.classList = "card-header";
+    fourDaysAfterContainer.appendChild(fourDaysAfterEl);
+
+    var fiveDaysAfter = moment().add(5, 'd').format("L");
+    var fiveDaysAfterEl = document.createElement("h4");
+    fiveDaysAfterEl.textContent = fiveDaysAfter;
+    fiveDaysAfterEl.classList = "card-header";
+    fiveDaysAfterContainer.appendChild(fiveDaysAfterEl);
+};
+
+
+
 
 
 // add submit event listener to the cityFormEl
 cityFormEl.addEventListener("submit", formSubmitHandler);
+
+
+
