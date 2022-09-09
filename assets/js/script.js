@@ -25,24 +25,26 @@ var cityInfoContainerEl = document.querySelector("#cityInfo-container");
 //create a variable to reference the city search history container on the left
 var searchHistoryContainer = document.querySelector("#search-history");
 
+
 //create five variables to reference the containers for the next five days forecast
-var oneDayAfterContainer = document.querySelector("#day1");
-var twoDaysAfterContainer = document.querySelector("#day2");
-var threeDaysAfterContainer = document.querySelector("#day3");
-var fourDaysAfterContainer = document.querySelector("#day4");
-var fiveDaysAfterContainer = document.querySelector("#day5");
+var dayOneAfter = moment().add(1, 'd').format("L");
+$("#day1 .card-header").text(dayOneAfter);
 
+var twoDaysAfter = moment().add(2, 'd').format("L");
+$("#day2 .card-header").text(twoDaysAfter);
 
-// construct openweather query URL which will store the current weather data
-// everything before ? is the base URL for calling the Current Weather Data API
-// ? marks the boundary between the base URL of the API call and the query terms of the API call
-// q= is the query parameter where you can add any user input to specify the data we want to request in the API call. the value assigned to this parameter is called the query string
-// ampersand & indicates that we're adding another parameter after the query parameter, appid= concatenates another parameter where we'll add the key, units imperial means the measure unit (Farenheit, MPH etc.)
+var threeDaysAfter = moment().add(3, 'd').format("L");
+$("#day3 .card-header").text(threeDaysAfter);
+
+var fourDaysAfter = moment().add(4, 'd').format("L");
+$("#day4 .card-header").text(fourDaysAfter);
+
+var fiveDaysAfter = moment().add(5, 'd').format("L");
+$("#day5 .card-header").text(fiveDaysAfter);
 
 
 var formSubmitHandler = function(event) {
     event.preventDefault();
-    //console.log(event);
 
     // capture the value from <input>
     var userCityName = cityInputEl.value.trim();
@@ -63,27 +65,21 @@ var getCityName = function(cityName) {
     var queryURL = "http://api.openweathermap.org/data/2.5/weather?q="+cityName+"&appid="+apiKey+"&units=imperial";
     // call the fetch api to pass the query URL as a parameter
     fetch(queryURL).then(function(response) {
-
         // check if the response is ok - meaning the requested city name exists
         if (response.ok) {
             response.json().then(function(data) {
-                
-                
                 //send response data to getCityCoordinates function
                 getCityCoordinates(data, cityName);
-
             });
         } else {
             alert("Error: City Name Not Found");
         }
     })
-
     //handle the response in case there's a network error
     .catch(function(error) {
         alert("Unable to connect to server");
     });
 };
-
 
 
 var getCityCoordinates = function(cityInfo, searchTerm) {
@@ -95,53 +91,40 @@ var getCityCoordinates = function(cityInfo, searchTerm) {
     // make sure to clear out old content before displaying new input content
     citySearchTerm.textContent = "";
 
-    // dynamically create a span element to hold a currently viewed city name and append to search-term div
-    var currentCity = document.createElement("span");
-    currentCity.classList = "text-uppercase";
-    currentCity.textContent = searchTerm;
-    citySearchTerm.appendChild(currentCity);
+    // dynamically create a span element to hold a currently viewed city name, date and weather icon and append to search-term div
+    // var currentCity = document.createElement("span");
+    // currentCity.classList = "text-uppercase";
+    // currentCity.textContent = searchTerm;
+    // citySearchTerm.appendChild(currentCity);
+    // 5 lines from above in two lines
+    var currentCity = $("<span></span>").appendTo(citySearchTerm);
+    currentCity.addClass("text-uppercase").text(searchTerm);
 
-    //dynamically create a span element to hold the current date info for the selected city
     var currentDate = moment().format("L");
-    var currentDateEl = document.createElement("span");
-    currentDateEl.textContent = " ("+currentDate+") ";
-    citySearchTerm.appendChild(currentDateEl);
-
-
-    console.log(searchTerm, lon, lat);
-
+    var currentDateEl = $("<span></span>").appendTo(citySearchTerm);
+    currentDateEl.text(" ("+currentDate+") ");
+    
     getSearchHistory(searchTerm);
-    console.log(searchTerm);
     getAllWeather(allWeather);
 };
 
 
-
 //create a function to dynamically generate element for search history
 var getSearchHistory = function(searchTerm) {
-    
-    //dynamically create buttons/holders to store the city name in the search history container
-    var cityHistoryList = document.createElement("button");
-    cityHistoryList.classList = "search-history-container text-uppercase";
-    var cityHistoryEl = document.createElement("span");
-    cityHistoryEl.textContent = searchTerm;
-    cityHistoryList.appendChild(cityHistoryEl);
-    searchHistoryContainer.appendChild(cityHistoryList);
+    var cityHistoryList = $("<button>").addClass("search-history-container text-uppercase");
+    var cityHistoryEl = $("<span>").text(searchTerm);
+    cityHistoryList.append(cityHistoryEl);
+    $("#search-history").append(cityHistoryList);
 };
-
-
-
 
 
 //create a function to get current UV index using lon and lat
 var getAllWeather = function(allWeather) {
     var uvQueryUrl = "https://api.openweathermap.org/data/3.0/onecall?lat="+lat+"&lon="+lon+"&units=imperial&exclude=minutely,hourly&appid="+apiKey;
     fetch(uvQueryUrl).then(function(response) {
-        //check if the response is ok
         if(response.ok) {
             console.log(response);
             response.json().then(function(data) {
-                
                 displayWeather(data);
                 console.log(data);
             });
@@ -156,99 +139,147 @@ var getAllWeather = function(allWeather) {
 
 
 var displayWeather = function(cityInfo) {
-    //console.log(cityInfo);
 
+    // handle the current day weather icon here becuase this function gets called when the second API call gives a response
+    var currentWeatherIcon = $("<img>");
+    var currIconCode = cityInfo.current.weather[0].icon;
+    console.log(currIconCode);
+    var currIconURL = "http://openweathermap.org/img/wn/" + currIconCode + "@2x.png";
+    currentWeatherIcon.attr('src', currIconURL);
+    currentWeatherIcon.append(currIconURL).appendTo(citySearchTerm);
+    
     // make sure to clear out old content before displaying new input content
     cityInfoContainerEl.textContent = "";
     
-
     // go throught the data for selected city and format the data for temperature, wind, humidity and UV
     var temp = "Temp: " + cityInfo.current.temp + "°F";
-    console.log(temp);
     var wind = "Wind: " + cityInfo.current.wind_speed + " MPH";
-    console.log(wind);
     var humidity = "Humidity: " + cityInfo.current.humidity + "%";
-    console.log(humidity);
-    var currentUV = "UV index: " + cityInfo.current.uvi;
-    console.log(currentUV);
     
-    //create a container and span for each data. append span to container, and then append that container to cityInfo-container div
-    var tempEl = document.createElement("div");
-    tempEl.classList = "param-list-item flex-row justify-space-between align-center";
-    var tempTitleEl = document.createElement("span");
-    tempTitleEl.textContent = temp;
-    tempEl.appendChild(tempTitleEl);
-    cityInfoContainerEl.appendChild(tempEl);
-
-    var windEl = document.createElement("div");
-    windEl.classList = "param-list-item flex-row justify-space-between align-center";
-    var windTitleEl = document.createElement("span");
-    windTitleEl.textContent = wind;
-    windEl.appendChild(windTitleEl);
-    cityInfoContainerEl.appendChild(windEl);
-
-    var humidEl = document.createElement("div");
-    humidEl.classList = "param-list-item flex-row justify-space-between align-center";
-    var humidTitleEl = document.createElement("span");
-    humidTitleEl.textContent = humidity;
-    humidEl.appendChild(humidTitleEl);
-    cityInfoContainerEl.appendChild(humidEl);
-
-    var uvIndexEl = document.createElement("div");
-    uvIndexEl.classList = "param-list-item flex-row justify-space-between align-center";
-    var uvIndexTitleEl = document.createElement("span");
-    uvIndexTitleEl.textContent = currentUV;
-    uvIndexEl.appendChild(uvIndexTitleEl);
-    cityInfoContainerEl.appendChild(uvIndexEl);
-
-    // call the function for the next five days to display after submitting city name
-    nextFiveDates();
+    var tempEl = $("<div></div>").appendTo(cityInfoContainerEl).addClass("param-list-item flex-row justify-space-between align-center");
+    var tempTitleEl = $("<span></span>").appendTo(tempEl).text(temp);
     
+    var windEl = $("<div></div>").appendTo(cityInfoContainerEl).addClass("param-list-item flex-row justify-space-between align-center");
+    var windTitleEl = $("<span></span>").appendTo(windEl).text(wind);
+
+    var humidEl = $("<div></div>").appendTo(cityInfoContainerEl).addClass("param-list-item flex-row justify-space-between align-center");
+    var humidTitleEl = $("<span></span>").appendTo(humidEl).text(humidity);
+
+    //handle UV index and check its status to display the color-code
+    var uvContainer = $("<div></div").appendTo(cityInfoContainerEl).addClass("param-list-item flex-row justify-space-between align-center");
+    var uvTitleEl = $("<span></span>").appendTo(uvContainer).text("UV index: ");
+    var uvIndexEl = $("<span></span>");
+    if(cityInfo.current.uvi >= 0 && cityInfo.current.uvi <= 4 ) {
+        uvIndexEl.addClass("favorable");
+    } else if(cityInfo.current.uvi >= 4 && cityInfo.current.uvi <= 7) {
+        uvIndexEl.removeClass("favorable");
+        uvIndexEl.addClass("moderate");
+    } else if(cityInfo.current.uvi >= 7 && cityInfo.current.uvi <= 10) {
+        uvIndexEl.removeClass("favorable");
+        uvIndexEl.removeClass("moderate");
+        uvIndexEl.addClass("severe");
+    };
+    uvIndexEl.append(cityInfo.current.uvi).appendTo(uvContainer);
+
+    getFutureForecast(cityInfo);
 };
 
 
-// create function to generate the dates for the next five days from current view date
-var nextFiveDates = function() {
+var getFutureForecast = function(cityInfo) {
 
-    // make sure to clear out old content before displaying new input content
-    oneDayAfterContainer.textContent = "";
-    twoDaysAfterContainer.textContent = "";
-    threeDaysAfterContainer.textContent = "";
-    fourDaysAfterContainer.textContent = "";
-    fiveDaysAfterContainer.textContent = "";
+    // create a variable to store an array of dialy forecast and get the values for 5 days
+    var dailyArray = cityInfo.daily;
+   
+    var dayOneIcon = $("<img>");
+    var icon1 = cityInfo.daily[0].weather[0].icon;
+    var iconURL = "http://openweathermap.org/img/wn/"+icon1+"@2x.png";
+    dayOneIcon.attr('src', iconURL).append(iconURL).appendTo($("#iconday1"));
 
-    // get the dates for the next 5 days cards
-    var dayOneAfter = moment().add(1, 'd').format("L");
-    var oneDayAfterEl = document.createElement("h4");
-    oneDayAfterEl.textContent = dayOneAfter;
-    oneDayAfterEl.classList = "card-header";
-    oneDayAfterContainer.appendChild(oneDayAfterEl);
+    $("#temp1").text("");
+    var temp1 = $("<span>").text("Temp: " + dailyArray[0].temp.day + " °F");
+    $("#temp1").append(temp1);
 
-    var twoDaysAfter = moment().add(2, 'd').format("L");
-    var twoDaysAfterEl = document.createElement("h4");
-    twoDaysAfterEl.textContent = twoDaysAfter;
-    twoDaysAfterEl.classList = "card-header";
-    twoDaysAfterContainer.appendChild(twoDaysAfterEl);
+    $("#wind1").text("");
+    var wind1 = $("<span>").text("Wind: " + dailyArray[0].wind_speed + " MPH");
+    $("#wind1").append(wind1);
 
-    var threeDaysAfter = moment().add(3, 'd').format("L");
-    var threeDaysAfterEl = document.createElement("h4");
-    threeDaysAfterEl.textContent = threeDaysAfter;
-    threeDaysAfterEl.classList = "card-header";
-    threeDaysAfterContainer.appendChild(threeDaysAfterEl);
+    $("#humid1").text("");
+    var humid1 = $("<span>").text("Humidity: " + dailyArray[0].humidity + " %");
+    $("#humid1").append(humid1);
 
-    var fourDaysAfter = moment().add(4, 'd').format("L");
-    var fourDaysAfterEl = document.createElement("h4");
-    fourDaysAfterEl.textContent = fourDaysAfter;
-    fourDaysAfterEl.classList = "card-header";
-    fourDaysAfterContainer.appendChild(fourDaysAfterEl);
+    // ---------- 2nd day after current day -----------//
+    var dayTwoIcon = $("<img>");
+    var icon2 = cityInfo.daily[1].weather[0].icon;
+    var iconURL = "http://openweathermap.org/img/wn/"+icon2+"@2x.png";
+    dayTwoIcon.attr('src', iconURL).append(iconURL).appendTo($("#iconday2"));
 
-    var fiveDaysAfter = moment().add(5, 'd').format("L");
-    var fiveDaysAfterEl = document.createElement("h4");
-    fiveDaysAfterEl.textContent = fiveDaysAfter;
-    fiveDaysAfterEl.classList = "card-header";
-    fiveDaysAfterContainer.appendChild(fiveDaysAfterEl);
+    $("#temp2").text("");
+    var temp2 = $("<span>").text("Temp: " + dailyArray[1].temp.day + " °F");
+    $("#temp2").append(temp2);
+
+    $("#wind2").text("");
+    var wind2 = $("<span>").text("Wind: " + dailyArray[1].wind_speed + " MPH");
+    $("#wind2").append(wind2);
+
+    $("#humid2").text("");
+    var humid2 = $("<span>").text("Humidity: " + dailyArray[1].humidity + " %");
+    $("#humid2").append(humid2);
+
+    // ---------- 3rd day after current day -----------//
+    var dayThreeIcon = $("<img>");
+    var icon3 = cityInfo.daily[2].weather[0].icon;
+    var iconURL = "http://openweathermap.org/img/wn/"+icon3+"@2x.png";
+    dayThreeIcon.attr('src', iconURL).append(iconURL).appendTo($("#iconday3"));
+
+    $("#temp3").text("");
+    var temp3 = $("<span>").text("Temp: " + dailyArray[2].temp.day + " °F");
+    $("#temp3").append(temp3);
+
+    $("#wind3").text("");
+    var wind3 = $("<span>").text("Wind: " + dailyArray[2].wind_speed + " MPH");
+    $("#wind3").append(wind3);
+
+    $("#humid3").text("");
+    var humid3 = $("<span>").text("Humidity: " + dailyArray[2].humidity + " %");
+    $("#humid3").append(humid3);
+
+    // ---------- 4th day after current day -----------//
+    var dayFourIcon = $("<img>");
+    var icon4 = cityInfo.daily[3].weather[0].icon;
+    var iconURL = "http://openweathermap.org/img/wn/"+icon4+"@2x.png";
+    dayFourIcon.attr('src', iconURL).append(iconURL).appendTo($("#iconday4"));
+
+    $("#temp4").text("");
+    var temp4 = $("<span>").text("Temp: " + dailyArray[3].temp.day + " °F");
+    $("#temp4").append(temp4);
+
+    $("#wind4").text("");
+    var wind4 = $("<span>").text("Wind: " + dailyArray[3].wind_speed + " MPH");
+    $("#wind4").append(wind4);
+
+    $("#humid4").text("");
+    var humid4 = $("<span>").text("Humidity: " + dailyArray[3].humidity + " %");
+    $("#humid4").append(humid4);
+
+    // ---------- 5th day after current day -----------//
+    var dayFiveIcon = $("<img>");
+    var icon5 = cityInfo.daily[4].weather[0].icon;
+    var iconURL = "http://openweathermap.org/img/wn/"+icon5+"@2x.png";
+    dayFiveIcon.attr('src', iconURL).append(iconURL).appendTo($("#iconday5"));
+
+    $("#temp5").text("");
+    var temp5 = $("<span>").text("Temp: " + dailyArray[4].temp.day + " °F");
+    $("#temp5").append(temp5);
+
+    $("#wind5").text("");
+    var wind5 = $("<span>").text("Wind: " + dailyArray[4].wind_speed + " MPH");
+    $("#wind5").append(wind5);
+
+    $("#humid5").text("");
+    var humid5 = $("<span>").text("Humidity: " + dailyArray[4].humidity + " %");
+    $("#humid5").append(humid5);
+    
 };
-
 
 // add submit event listener to the cityFormEl
 cityFormEl.addEventListener("submit", formSubmitHandler);
