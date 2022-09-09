@@ -25,6 +25,8 @@ var cityInfoContainerEl = document.querySelector("#cityInfo-container");
 //create a variable to reference the city search history container on the left
 var searchHistoryContainer = document.querySelector("#search-history");
 
+var cityInfoArray = [];
+
 
 //create five variables to reference the containers for the next five days forecast
 var dayOneAfter = moment().add(1, 'd').format("L");
@@ -52,6 +54,13 @@ var formSubmitHandler = function(event) {
     if (userCityName) {
         // if it is then call getCityName function with user's input
         getCityName(userCityName);
+
+        // once you get the city name push into empty array to store
+        if (!cityInfoArray.includes(userCityName)) {
+            cityInfoArray.push(userCityName);
+            localStorage.setItem("allCities", JSON.stringify(cityInfoArray));
+        }
+        
         // clear the input form for the next submission
         cityInputEl.value = "";
     } else {
@@ -62,7 +71,7 @@ var formSubmitHandler = function(event) {
 
 // create a function 
 var getCityName = function(cityName) {
-    var queryURL = "http://api.openweathermap.org/data/2.5/weather?q="+cityName+"&appid="+apiKey+"&units=imperial";
+    var queryURL = "https://api.openweathermap.org/data/2.5/weather?q="+cityName+"&appid="+apiKey+"&units=imperial";
     // call the fetch api to pass the query URL as a parameter
     fetch(queryURL).then(function(response) {
         // check if the response is ok - meaning the requested city name exists
@@ -111,7 +120,8 @@ var getCityCoordinates = function(cityInfo, searchTerm) {
 
 //create a function to dynamically generate element for search history
 var getSearchHistory = function(searchTerm) {
-    var cityHistoryList = $("<button>").addClass("search-history-container text-uppercase");
+    var cityHistoryList = $("<button>").addClass("search-history-container text-uppercase")
+    cityHistoryList.attr("value", searchTerm);
     var cityHistoryEl = $("<span>").text(searchTerm);
     cityHistoryList.append(cityHistoryEl);
     $("#search-history").append(cityHistoryList);
@@ -182,6 +192,9 @@ var displayWeather = function(cityInfo) {
     uvIndexEl.append(cityInfo.current.uvi).appendTo(uvContainer);
 
     getFutureForecast(cityInfo);
+
+    // call saveWeather function so the data will be saved in local storage once it's displayed
+    //saveWeather();
 };
 
 
@@ -283,3 +296,21 @@ var getFutureForecast = function(cityInfo) {
 
 // add submit event listener to the cityFormEl
 cityFormEl.addEventListener("submit", formSubmitHandler);
+
+
+// => sub for function
+searchHistoryContainer.addEventListener("click", () => {
+    // cityInfoContainerEl.empty();
+    const cityClicked = this.event.target.value;
+    console.log(cityClicked, "click");
+});
+
+
+
+// var saveWeather = function() {
+
+// };
+
+
+// this function will be called when the page is loaded
+//loadWeather();
