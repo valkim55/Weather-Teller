@@ -14,6 +14,7 @@ Openweathermap.org API was utilized to get the weather data. Application uses cl
 
 
 ![weather-teller-screenshot](./assets/images/webapp-scr.JPG)
+![app-search-history-screenshot](./assets/images/search-history.JPG)
 
 
 ##### Thank you 🧡
