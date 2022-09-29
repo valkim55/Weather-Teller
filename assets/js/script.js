@@ -85,6 +85,7 @@ var createSearchHistory = function (cityInfoArray) {
 var getCityCoordinates = function (cityName, data) {
     lonRaw = data.coord.lon;
     latRaw = data.coord.lat;
+    console.log(lonRaw, latRaw);
     lon = Math.round(lonRaw * 100) / 100;
     lat = Math.round(latRaw * 100) / 100;
     geoLocation.push(lon, lat);
